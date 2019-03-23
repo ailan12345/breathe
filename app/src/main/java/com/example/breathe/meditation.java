@@ -31,10 +31,7 @@ public class meditation extends AppCompatActivity {
         setContentView(R.layout.activity_meditation);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-//        setVibrate(500); // 震動 1 秒
         addListenerOnButton();
-
-
     }
 
     public void setVibrate(int time){
@@ -44,8 +41,6 @@ public class meditation extends AppCompatActivity {
     public void addListenerOnButton() {
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
         btnDisplay = (Button) findViewById(R.id.button5);
-        mTextView = (TextView) findViewById(R.id.textView6);
-//        debugValue = (TextView) findViewById(R.id.textView7);
         btnDisplay.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,7 +51,6 @@ public class meditation extends AppCompatActivity {
 
                 Toast.makeText(meditation.this,
                         "準備計時" + radioButton.getText(), Toast.LENGTH_SHORT).show();
-//                final String radioButtonValue = radioButton.getText().toString();
                 int reciprocal = 10000;
                 switch(radioButton.getId()){
                     case R.id.radioButton2:
@@ -72,24 +66,11 @@ public class meditation extends AppCompatActivity {
                         reciprocal = 240000;
                         break;
                 }
-                new CountDownTimer(reciprocal, 1000) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                        //倒數秒數中要做的事
-//                        mTextView.setText("倒數時間:" + millisUntilFinished / 1000);
-                        mTextView.setText("倒數時間:" + ((millisUntilFinished/1000)+1)%6);
-                        TextView myAwesomeTextView = (TextView)findViewById(R.id.textView7);
-                        myAwesomeTextView.setText("aaa" + millisUntilFinished/1000);
-                        if(((millisUntilFinished/1000)+1)%6 == 0){
-                            setVibrate(400); // 震動 0.4 秒
-                        }
-                    }
-                    @Override
-                    public void onFinish() {
-                        //倒數完成後要做的事
-                        mTextView.setText("Done!");
-                    }
-                }.start();
+                Intent gostart = new Intent();
+                gostart.setClass(meditation.this  , start.class);
+                gostart .putExtra("reciprocal",reciprocal);
+                startActivity(gostart);
+
             }
         });
     }
