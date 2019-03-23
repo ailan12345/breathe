@@ -9,6 +9,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ImageView;
+
 import android.widget.TextView;
 import android.content.Intent;
 
@@ -28,6 +30,8 @@ public class start extends AppCompatActivity {
 
         Intent intent = this.getIntent();
         int reciprocal = intent.getIntExtra("reciprocal", 10000);
+
+        ImageView gifImageView2 = (ImageView) findViewById(R.id.imageView);
 
         new CountDownTimer(reciprocal, 1000) {
             TextView mTextView = (TextView) findViewById(R.id.textView6);
