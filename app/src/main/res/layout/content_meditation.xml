@@ -53,6 +53,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
+            android:checked="true"
             android:orientation="horizontal"
             android:text="4 min" />
 
@@ -77,6 +78,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
+            android:checked="true"
             android:text="1 min"
             tools:layout_editor_absoluteX="126dp"
             tools:layout_editor_absoluteY="143dp" />
