@@ -1,27 +1,18 @@
 package com.example.breathe;
 
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
-import android.app.Application;
 import android.app.Service;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Vibrator;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import android.widget.TextView;
 import android.content.Intent;
 import android.widget.Toast;
-
-import java.util.Timer;
 
 public class start extends AppCompatActivity {
 
@@ -29,7 +20,7 @@ public class start extends AppCompatActivity {
         Vibrator myVibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
         myVibrator.vibrate(time);
     }
-
+    MediaPlayer  mediaPlayer;
     CountDownTimer yourCountDownTimer;
     CountDownTimer yourCountDownTimer2;
     int reciprocal = 10000;
@@ -41,8 +32,9 @@ public class start extends AppCompatActivity {
         setContentView(R.layout.activity_start);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        ImageView image = (ImageView) findViewById(R.id.image);
+        mediaPlayer = MediaPlayer.create(this, R.raw.train);
+        mediaPlayer.start();
+//    ImageView image = (ImageView) findViewById(R.id.image);
 //        Animation hyperspaceJump = AnimationUtils.loadAnimation(this, R.anim.fadescalecombine);
 //        image.startAnimation(hyperspaceJump);
 //        AnimatorSet set = (AnimatorSet) AnimatorInflater.loadAnimator(this,
@@ -109,8 +101,11 @@ public class start extends AppCompatActivity {
     {
         super.onPause();
         Toast.makeText(start.this,
-                "test" , Toast.LENGTH_SHORT).show();
+                "返回" , Toast.LENGTH_SHORT).show();
         yourCountDownTimer.cancel();
         yourCountDownTimer2.cancel();
+        mediaPlayer.stop();
+        mediaPlayer.release();
     }
+
 }

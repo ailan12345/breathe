@@ -12,11 +12,14 @@
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginTop="44dp"
-        android:layout_marginEnd="200dp"
-        android:layout_marginRight="200dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:text="冥想"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
@@ -88,9 +91,12 @@
         android:id="@+id/textView5"
         android:layout_width="74dp"
         android:layout_height="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="40dp"
         android:text="進行時間 : "
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="108dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
     <TextView
         android:id="@+id/textView8"
