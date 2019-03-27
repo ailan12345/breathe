@@ -8,24 +8,27 @@ import android.os.CountDownTimer;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.widget.ImageView;
 
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.content.Intent;
 import android.widget.Toast;
 
 public class start extends AppCompatActivity {
-
+    //震動
     public void setVibrate(int time){
         Vibrator myVibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
         myVibrator.vibrate(time);
     }
+
+
     MediaPlayer  mediaPlayer;
     CountDownTimer yourCountDownTimer;
     CountDownTimer yourCountDownTimer2;
     int reciprocal = 10000;
     int frequency = 2;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,20 +66,23 @@ public class start extends AppCompatActivity {
             mTextView.setText("Done!");
         }
     }.start();
-
         yourCountDownTimer2 = new CountDownTimer(reciprocal, (frequency-1)*1000) {
             int i = 0;
             int frequencyTime = 0;
+            ProgressBar myProgressBar = (ProgressBar) findViewById(R.id.progressBar);
             TextView myAwesomeTextView = (TextView)findViewById(R.id.textView7);
             @Override
             public void onTick(long millisUntilFinished) {
                 //倒數秒數中要做的事
-                setVibrate(200); // 震動 0.4 秒
+                setVibrate(200); // 震動 0.2 秒
                 i += 1;
+                myProgressBar.setProgress(0);
                 new CountDownTimer(frequency*1000, 1000) {
                     TextView mTextView = (TextView) findViewById(R.id.textView6);
                     @Override
                     public void onTick(long millisUntilFinished) {
+                        Log.v("Log_tag", "Tick of Progress" +(int)(frequency-(millisUntilFinished/1000))*(100/frequency) + "|||||" + millisUntilFinished);
+                        myProgressBar.setProgress((int)(frequency-(millisUntilFinished/1000))*(100/frequency));
                         if (i % 2 == 1) {
                             myAwesomeTextView.setText("吸氣" + ((millisUntilFinished / 1000)));
                         } else {
@@ -85,13 +91,14 @@ public class start extends AppCompatActivity {
                     } @Override
                     public void onFinish() {
                         //倒數完成後要做的事
+                        myProgressBar.setProgress(100);
                     }
                 }.start();
             }
             @Override
             public void onFinish() {
                 //倒數完成後要做的事
-                setVibrate(200); // 震動 0.4 秒
+                setVibrate(200); // 震動 0.2 秒
                 myAwesomeTextView.setText("Done!");
             }
         }.start();
