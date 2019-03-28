@@ -21,7 +21,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.app.Service;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -35,7 +38,9 @@ public class MainActivity extends AppCompatActivity {
     private ConnectThread connectThread;
     BluetoothAdapter bluetoothAdapter;
     UUID MY_UUID;
-    private OutputStream os;//輸出流
+    private OutputStream tmpOut ;//輸出流
+    private InputStream tmpIn ;//輸入流
+
 
 
 //    private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -97,15 +102,35 @@ public class MainActivity extends AppCompatActivity {
         TextView mTeView = (TextView) findViewById(R.id.textView3);
         mTeView.setText("UUID:"+MY_UUID.randomUUID().toString());
 
-
         connectThread = new ConnectThread(device);
+        int bytes;
         connectThread.run();
+        byte[] buffer = new byte[256];
         TextView osValue = (TextView) findViewById(R.id.osValue);
-        osValue.setText(os.toString());
-//        public void getUuids_setUuidsNotCalled_shouldReturnNull() throws Exception {
-//            BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice("8C:DE:52:44:A7:40");
-//            assertThat(device.getUuids()).isNull();
-//        }
+        try {
+            Log.d((String) this.getTitle(), "Closing Server Socket.....");
+//            connectThread.cancel();
+
+//            InputStream tmpIn = null;
+//            OutputStream tmpOut = null;
+
+            // Get the BluetoothSocket input and output streams
+
+            DataInputStream mmInStream = new DataInputStream(tmpIn);
+            DataOutputStream mmOutStream = new DataOutputStream(tmpOut);
+            // here you can use the Input Stream to take the string from the client  whoever is connecting
+            //similarly use the output stream to send the data to the client
+
+            // Read from the InputStream
+            bytes = mmInStream.read(buffer);
+            String readMessage = new String(buffer, 0, bytes);
+            // Send the obtained bytes to the UI Activity
+//            readMessage = new String(readMessage.getBytes(), "US-ASCII");
+            Log.e("TGAAA", readMessage);
+            osValue.setText(readMessage);
+        } catch (Exception e) {
+            //catch your exception here
+        }
 
            Button  desBtn1 = (Button) findViewById(R.id.button);//呼吸
         desBtn1.setOnClickListener(new View.OnClickListener() {
@@ -209,15 +234,18 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             // Cancel discovery because it otherwise slows down the connection.
             bluetoothAdapter.cancelDiscovery();
-
+            try {
+                tmpIn = mmSocket.getInputStream();
+            } catch (IOException e) {
+                Log.e("TAG", "Error occurred when creating output stream", e);
+            }
             try {
                 // Connect to the remote device through the socket. This call blocks
                 // until it succeeds or throws an exception.
                 mmSocket.connect();
-                os = mmSocket.getOutputStream();
-                Log.e("TGA", "WWWWWWWWWWWWWWWWWWWWWWWWWW");
+                tmpOut  = mmSocket.getOutputStream();
             } catch (IOException connectException) {
-                // Unable to connect; close the socket and return.
+            // Unable to connect; close the socket and return.
                 try {
                     mmSocket.close();
                 } catch (IOException closeException) {
