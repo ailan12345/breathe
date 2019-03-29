@@ -246,21 +246,21 @@ public class MainActivity extends AppCompatActivity {
                 tmpOut  = mmSocket.getOutputStream();
                 tmpIn = mmSocket.getInputStream();
 
-//                while((i=tmpIn.read())!=-1)
-//                {
-//                    // int to character
+                while((i=tmpIn.read())!=-1)
+                {
+                    // int to character
 //                    c=(char)i;
-//                    // print char
-//                    Log.e("TGAC", "Character Read: "+c);
-//                }
-                while(t!=1024) {
-                    t++;
-                    byte[] buffer =new byte[256];
-                    int count = tmpIn.read(buffer);
-                    Message msg = new Message();
-                    msg.obj = new String(buffer, 0, count, "UTF-8");
-                    handler.sendMessage(msg);
+                    // print char
+                    Log.e("TGAC", "Character Read: "+i);
                 }
+//                while(t!=1024) {
+//                    t++;
+//                    byte[] buffer =new byte[256];
+//                    int count = tmpIn.read(buffer);
+//                    Message msg = new Message();
+//                    msg.obj = new String(buffer, 0, count, "UTF-8");
+//                    handler.sendMessage(msg);
+//                }
             } catch (IOException connectException) {
             // Unable to connect; close the socket and return.
                 try {
