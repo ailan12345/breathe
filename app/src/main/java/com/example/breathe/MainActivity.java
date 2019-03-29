@@ -8,6 +8,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -43,7 +45,9 @@ public class MainActivity extends AppCompatActivity {
     private OutputStream tmpOut ;//輸出流
     private InputStream tmpIn ;//輸入流
     TextView osValue;
-
+    int signalquality;
+    int attention;
+    int meditation;
 
 
 //    private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -103,11 +107,26 @@ public class MainActivity extends AppCompatActivity {
         BluetoothDevice device = bluetoothAdapter.getDefaultAdapter().getRemoteDevice("8C:DE:52:44:A7:40");
         MY_UUID = device.getUuids()[0].getUuid();
         TextView mTeView = (TextView) findViewById(R.id.textView3);
-        mTeView.setText("UUId:"+MY_UUID.randomUUID().toString());
+        mTeView.setText("UUID:"+MY_UUID.randomUUID().toString());
 
         connectThread = new ConnectThread(device);
         connectThread.run();
         osValue = (TextView) findViewById(R.id.osValue);
+        osValue.setText(tmpIn.toString());
+//        switch(tmpIn.toString()){
+//            case tmpIn.POOR_SIGNAL:
+//                reciprocal = 20000;
+//                break;
+//            case R.id.radioButton3:
+//                reciprocal = 120000;
+//                break;
+//            case R.id.radioButton4:
+//                reciprocal = 180000;
+//                break;
+//            case R.id.radioButton5:
+//                reciprocal = 240000;
+//                break;
+//        }
 
 
            Button  desBtn1 = (Button) findViewById(R.id.button);//呼吸
@@ -220,17 +239,26 @@ public class MainActivity extends AppCompatActivity {
             // Cancel discovery because it otherwise slows down the connection.
             bluetoothAdapter.cancelDiscovery();
             int t =0;
+            char c;
+            int i;
             try {
                 mmSocket.connect();
                 tmpOut  = mmSocket.getOutputStream();
                 tmpIn = mmSocket.getInputStream();
 
+//                while((i=tmpIn.read())!=-1)
+//                {
+//                    // int to character
+//                    c=(char)i;
+//                    // print char
+//                    Log.e("TGAC", "Character Read: "+c);
+//                }
                 while(t!=1024) {
                     t++;
                     byte[] buffer =new byte[256];
                     int count = tmpIn.read(buffer);
                     Message msg = new Message();
-                    msg.obj = new String(buffer, 0, count);
+                    msg.obj = new String(buffer, 0, count, "UTF-8");
                     handler.sendMessage(msg);
                 }
             } catch (IOException connectException) {
