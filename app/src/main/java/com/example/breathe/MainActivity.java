@@ -8,6 +8,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     UUID MY_UUID;
     private OutputStream tmpOut ;//輸出流
     private InputStream tmpIn ;//輸入流
+    TextView osValue;
 
 
 
@@ -100,37 +103,12 @@ public class MainActivity extends AppCompatActivity {
         BluetoothDevice device = bluetoothAdapter.getDefaultAdapter().getRemoteDevice("8C:DE:52:44:A7:40");
         MY_UUID = device.getUuids()[0].getUuid();
         TextView mTeView = (TextView) findViewById(R.id.textView3);
-        mTeView.setText("UUID:"+MY_UUID.randomUUID().toString());
+        mTeView.setText("UUId:"+MY_UUID.randomUUID().toString());
 
         connectThread = new ConnectThread(device);
-        int bytes;
         connectThread.run();
-        byte[] buffer = new byte[256];
-        TextView osValue = (TextView) findViewById(R.id.osValue);
-        try {
-            Log.d((String) this.getTitle(), "Closing Server Socket.....");
-//            connectThread.cancel();
+        osValue = (TextView) findViewById(R.id.osValue);
 
-//            InputStream tmpIn = null;
-//            OutputStream tmpOut = null;
-
-            // Get the BluetoothSocket input and output streams
-
-            DataInputStream mmInStream = new DataInputStream(tmpIn);
-            DataOutputStream mmOutStream = new DataOutputStream(tmpOut);
-            // here you can use the Input Stream to take the string from the client  whoever is connecting
-            //similarly use the output stream to send the data to the client
-
-            // Read from the InputStream
-            bytes = mmInStream.read(buffer);
-            String readMessage = new String(buffer, 0, bytes);
-            // Send the obtained bytes to the UI Activity
-//            readMessage = new String(readMessage.getBytes(), "US-ASCII");
-            Log.e("TGAAA", readMessage);
-            osValue.setText(readMessage);
-        } catch (Exception e) {
-            //catch your exception here
-        }
 
            Button  desBtn1 = (Button) findViewById(R.id.button);//呼吸
         desBtn1.setOnClickListener(new View.OnClickListener() {
@@ -208,6 +186,13 @@ public class MainActivity extends AppCompatActivity {
         // Don't forget to unregister the ACTION_FOUND receiver.
         unregisterReceiver(receiver);
     }
+    private Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            Toast.makeText(getApplicationContext(), String.valueOf(msg.obj),
+                    Toast.LENGTH_LONG).show();
+            super.handleMessage(msg);
+        }
+    };
 
 
 
@@ -234,16 +219,20 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             // Cancel discovery because it otherwise slows down the connection.
             bluetoothAdapter.cancelDiscovery();
+            int t =0;
             try {
-                tmpIn = mmSocket.getInputStream();
-            } catch (IOException e) {
-                Log.e("TAG", "Error occurred when creating output stream", e);
-            }
-            try {
-                // Connect to the remote device through the socket. This call blocks
-                // until it succeeds or throws an exception.
                 mmSocket.connect();
                 tmpOut  = mmSocket.getOutputStream();
+                tmpIn = mmSocket.getInputStream();
+
+                while(t!=1024) {
+                    t++;
+                    byte[] buffer =new byte[256];
+                    int count = tmpIn.read(buffer);
+                    Message msg = new Message();
+                    msg.obj = new String(buffer, 0, count);
+                    handler.sendMessage(msg);
+                }
             } catch (IOException connectException) {
             // Unable to connect; close the socket and return.
                 try {
