@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     private OutputStream tmpOut ;//輸出流
     private InputStream tmpIn ;//輸入流
     TextView osValue;
-    int signalquality;
     int attention;
     int meditation;
 
@@ -241,24 +241,42 @@ public class MainActivity extends AppCompatActivity {
             int t =0;
             char c;
             int i;
+            Boolean need = false;
+            List<Integer> data = new ArrayList<Integer>();
+            List<Integer> needdata = new ArrayList<Integer>();
             try {
                 mmSocket.connect();
                 tmpOut  = mmSocket.getOutputStream();
                 tmpIn = mmSocket.getInputStream();
-
                 while((i=tmpIn.read())!=-1)
                 {
-                    // int to character
-//                    c=(char)i;
-                    // print char
-                    Log.e("TGAC", "Character Read: "+i);
+                    data.add(i);
+                    if(data.size()>8 && i==131 &&
+                        data.get(data.size()-2)==0 &&
+                        data.get(data.size()-4)==32 &&
+                        data.get(data.size()-5)==170 && data.get(data.size()-6)==170 && !need) {
+                        need = true; }
+                    if(need){
+                    needdata.add(i);}
+                    //  int attention;4 26     int meditation;5 28
+                    if (needdata.size()==31){
+//                        Log.e("TGACE", "needdata "+needdata);
+                        attention=needdata.get(27);
+                        meditation=needdata.get(29);
+                        Log.e("TGAC", "attention and meditation: "+attention+"||||"+meditation);}//Integer.toHexString(i)
+                    if (needdata.size()>31){
+                        needdata = new ArrayList<Integer>();
+                        data = new ArrayList<Integer>();
+                        need = false;
+                    }
+
                 }
 //                while(t!=1024) {
 //                    t++;
 //                    byte[] buffer =new byte[256];
 //                    int count = tmpIn.read(buffer);
 //                    Message msg = new Message();
-//                    msg.obj = new String(buffer, 0, count, "UTF-8");
+//                    msg.obj = new String(buffer, 0, count);
 //                    handler.sendMessage(msg);
 //                }
             } catch (IOException connectException) {
