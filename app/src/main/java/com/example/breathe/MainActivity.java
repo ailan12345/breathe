@@ -46,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private OutputStream tmpOut ;//輸出流
     private InputStream tmpIn ;//輸入流
     TextView osValue;
-    int attention;
-    int meditation;
+    int attention = 0;
+    int meditation = 0;
 
 
 //    private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -74,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 
-
         // Register for broadcasts when a device is discovered.
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(receiver, filter);
@@ -87,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
             setVibrate(1000); // 震動 1 秒
-            Toast.makeText(getApplicationContext(),"請開啟藍芽",
+            Toast.makeText(getApplicationContext(), "請開啟藍芽",
                     Toast.LENGTH_LONG).show();
         }
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
@@ -107,60 +106,41 @@ public class MainActivity extends AppCompatActivity {
         BluetoothDevice device = bluetoothAdapter.getDefaultAdapter().getRemoteDevice("8C:DE:52:44:A7:40");
         MY_UUID = device.getUuids()[0].getUuid();
         TextView mTeView = (TextView) findViewById(R.id.textView3);
-        mTeView.setText("UUID:"+MY_UUID.randomUUID().toString());
-
-        connectThread = new ConnectThread(device);
-        connectThread.run();
-        osValue = (TextView) findViewById(R.id.osValue);
-        osValue.setText(tmpIn.toString());
-//        switch(tmpIn.toString()){
-//            case tmpIn.POOR_SIGNAL:
-//                reciprocal = 20000;
-//                break;
-//            case R.id.radioButton3:
-//                reciprocal = 120000;
-//                break;
-//            case R.id.radioButton4:
-//                reciprocal = 180000;
-//                break;
-//            case R.id.radioButton5:
-//                reciprocal = 240000;
-//                break;
-//        }
+        mTeView.setText("UUID:" + MY_UUID.randomUUID().toString());
 
 
-           Button  desBtn1 = (Button) findViewById(R.id.button);//呼吸
+        Button desBtn1 = (Button) findViewById(R.id.button);//呼吸
         desBtn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent godescription = new Intent();
-                godescription.setClass(MainActivity.this  , description.class);
+                godescription.setClass(MainActivity.this, description.class);
                 startActivity(godescription);
             }
         });
 
-        Button  meditationBtn = (Button) findViewById(R.id.button2);//冥想
+        Button meditationBtn = (Button) findViewById(R.id.button2);//冥想
         meditationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent gomeditation = new Intent();
-                gomeditation.setClass(MainActivity.this  , meditation.class);
+                gomeditation.setClass(MainActivity.this, meditation.class);
                 startActivity(gomeditation);
             }
         });
 
-        Button  desBtn = (Button) findViewById(R.id.button3);//說明
+        Button desBtn = (Button) findViewById(R.id.button3);//說明
         desBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent godescription = new Intent();
-                godescription.setClass(MainActivity.this  , description.class);
+                godescription.setClass(MainActivity.this, description.class);
                 startActivity(godescription);
             }
         });
 
-        Button btnBluetoothAdapter  = (Button) findViewById(R.id.button4);//藍芽
-        TextView tvDevices = (TextView)findViewById(R.id.textView3);
+        Button btnBluetoothAdapter = (Button) findViewById(R.id.button4);//藍芽
+        TextView tvDevices = (TextView) findViewById(R.id.textView3);
         btnBluetoothAdapter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -168,16 +148,91 @@ public class MainActivity extends AppCompatActivity {
                 if (!bluetoothAdapter.isEnabled()) {
                     Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(turnOn, 0);
-                    Toast.makeText(getApplicationContext(),"開啟中"
-                            ,Toast.LENGTH_LONG).show();
-                }
-                else{
-                    Toast.makeText(getApplicationContext(),"已經開啟",
+                    Toast.makeText(getApplicationContext(), "開啟中"
+                            , Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "已經開啟",
                             Toast.LENGTH_LONG).show();
                 }
             }
         });
+        connectThread = new ConnectThread(device);
+        connectThread.run();
+
+        bluetoothAdapter.cancelDiscovery();
+        int t =0;
+        char c;
+        int i = 0;
+        Boolean need = false;
+        List<Integer> data = new ArrayList<Integer>();
+        List<Integer> needdata = new ArrayList<Integer>();
+
+        while(true)
+        {
+            try {
+                i=tmpIn.read();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            data.add(i);
+            if(data.size()>8 && i==131 &&
+                    data.get(data.size()-2)==0 &&
+                    data.get(data.size()-4)==32 &&
+                    data.get(data.size()-5)==170 && data.get(data.size()-6)==170 && !need) {
+                need = true; }
+            if(need){
+                needdata.add(i);}
+            //  int attention;4 26     int meditation;5 28
+            if (needdata.size()==31){
+//                        Log.e("TGACE", "needdata "+needdata);
+                attention=needdata.get(27);
+                meditation=needdata.get(29);
+                osValue = (TextView) findViewById(R.id.osValue);
+                osValue.setText(attention+"||||"+meditation);
+//                Log.e("TGAC", "attention and meditation: "+attention+"||||"+meditation);
+            }//Integer.toHexString(i)
+            if (needdata.size()>=31){
+                needdata = new ArrayList<Integer>();
+                data = new ArrayList<Integer>();
+                need = false;
+            }
+        }
+//        connectThread.cancel();
     }
+
+    Runnable myRunnable = new Runnable() {
+        @Override
+        public void run() {
+            int i;
+            Boolean need = false;
+            List<Integer> data = new ArrayList<Integer>();
+            List<Integer> needdata = new ArrayList<Integer>();
+            try{
+                while((i=tmpIn.read())!=-1)
+                {
+                    data.add(i);
+                    if(data.size()>8 && i==131 &&
+                            data.get(data.size()-2)==0 &&
+                            data.get(data.size()-4)==32 &&
+                            data.get(data.size()-5)==170 && data.get(data.size()-6)==170 && !need) {
+                        need = true; }
+                    if(need){
+                        needdata.add(i);}
+                    //  int attention;4 26     int meditation;5 28
+                    if (needdata.size()==31){
+//                        Log.e("TGACE", "needdata "+needdata);
+                        attention=needdata.get(27);
+                        meditation=needdata.get(29);
+                        osValue = (TextView) findViewById(R.id.osValue);
+                        osValue.setText(attention+"||||"+meditation);
+//                        try{osValue.setText(attention+"||||"+meditation);}finally {}
+                        Log.e("TGAC", "attention and meditation: "+attention+"||||"+meditation);//Integer.toHexString(i)
+                        if (needdata.size()>31){
+                            needdata = new ArrayList<Integer>();
+                            data = new ArrayList<Integer>();
+                            need = false;
+                        }
+                    }}}catch (IOException e) {return;}}};
 
     // Create a BroadcastReceiver for ACTION_FOUND.
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -248,29 +303,7 @@ public class MainActivity extends AppCompatActivity {
                 mmSocket.connect();
                 tmpOut  = mmSocket.getOutputStream();
                 tmpIn = mmSocket.getInputStream();
-                while((i=tmpIn.read())!=-1)
-                {
-                    data.add(i);
-                    if(data.size()>8 && i==131 &&
-                        data.get(data.size()-2)==0 &&
-                        data.get(data.size()-4)==32 &&
-                        data.get(data.size()-5)==170 && data.get(data.size()-6)==170 && !need) {
-                        need = true; }
-                    if(need){
-                    needdata.add(i);}
-                    //  int attention;4 26     int meditation;5 28
-                    if (needdata.size()==31){
-//                        Log.e("TGACE", "needdata "+needdata);
-                        attention=needdata.get(27);
-                        meditation=needdata.get(29);
-                        Log.e("TGAC", "attention and meditation: "+attention+"||||"+meditation);}//Integer.toHexString(i)
-                    if (needdata.size()>31){
-                        needdata = new ArrayList<Integer>();
-                        data = new ArrayList<Integer>();
-                        need = false;
-                    }
-
-                }
+            //目前下列註解不使用
 //                while(t!=1024) {
 //                    t++;
 //                    byte[] buffer =new byte[256];
