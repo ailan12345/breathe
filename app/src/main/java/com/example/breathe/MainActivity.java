@@ -158,58 +158,39 @@ public class MainActivity extends AppCompatActivity {
         });
         connectThread = new ConnectThread(device);
         connectThread.run();
+        ReadData rd = new ReadData();
+        rd.start();
 
-        bluetoothAdapter.cancelDiscovery();
+
+
+
+//        connectThread.cancel();
+    }
+
+//    private class UIHandler extends Handler{
+//        @Override
+//        public void handleMessage(Message msg) {
+//            // TODO Auto-generated method stub
+//            super.handleMessage(msg);
+//            Bundle bundle = msg.getData();
+//            String datab = bundle.getString("datab");
+//            osValue = (TextView) findViewById(R.id.osValue);
+//            osValue.setText(datab);
+//        }
+//    }
+
+    public class ReadData extends Thread{
         int t =0;
         char c;
         int i = 0;
         Boolean need = false;
         List<Integer> data = new ArrayList<Integer>();
         List<Integer> needdata = new ArrayList<Integer>();
+        //覆寫Thread方法run()
+        public void run(){
 
-        while(true)
-        {
             try {
-                i=tmpIn.read();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            data.add(i);
-            if(data.size()>8 && i==131 &&
-                    data.get(data.size()-2)==0 &&
-                    data.get(data.size()-4)==32 &&
-                    data.get(data.size()-5)==170 && data.get(data.size()-6)==170 && !need) {
-                need = true; }
-            if(need){
-                needdata.add(i);}
-            //  int attention;4 26     int meditation;5 28
-            if (needdata.size()==31){
-//                        Log.e("TGACE", "needdata "+needdata);
-                attention=needdata.get(27);
-                meditation=needdata.get(29);
-                osValue = (TextView) findViewById(R.id.osValue);
-                osValue.setText(attention+"||||"+meditation);
-//                Log.e("TGAC", "attention and meditation: "+attention+"||||"+meditation);
-            }//Integer.toHexString(i)
-            if (needdata.size()>=31){
-                needdata = new ArrayList<Integer>();
-                data = new ArrayList<Integer>();
-                need = false;
-            }
-        }
-//        connectThread.cancel();
-    }
-
-    Runnable myRunnable = new Runnable() {
-        @Override
-        public void run() {
-            int i;
-            Boolean need = false;
-            List<Integer> data = new ArrayList<Integer>();
-            List<Integer> needdata = new ArrayList<Integer>();
-            try{
-                while((i=tmpIn.read())!=-1)
-                {
+                while((i=tmpIn.read())!=-1){
                     data.add(i);
                     if(data.size()>8 && i==131 &&
                             data.get(data.size()-2)==0 &&
@@ -223,16 +204,30 @@ public class MainActivity extends AppCompatActivity {
 //                        Log.e("TGACE", "needdata "+needdata);
                         attention=needdata.get(27);
                         meditation=needdata.get(29);
-                        osValue = (TextView) findViewById(R.id.osValue);
-                        osValue.setText(attention+"||||"+meditation);
-//                        try{osValue.setText(attention+"||||"+meditation);}finally {}
-                        Log.e("TGAC", "attention and meditation: "+attention+"||||"+meditation);//Integer.toHexString(i)
-                        if (needdata.size()>31){
-                            needdata = new ArrayList<Integer>();
-                            data = new ArrayList<Integer>();
-                            need = false;
+//                        Message msg = new Message();
+//                        Bundle bundle = new Bundle();
+//                        bundle.putString("datab", attention+"||||"+meditation);
+//                        msg.setData(bundle);
+//                        MainActivity.this.ReadData.sendMessage(msg);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            osValue = (TextView) findViewById(R.id.osValue);
+                            osValue.setText(attention+"||||"+meditation);
                         }
-                    }}}catch (IOException e) {return;}}};
+                    });
+                         Log.e("TGAC", "attention and meditation: "+attention+"||||"+meditation);
+                    }//Integer.toHexString(i)
+                    if (needdata.size()>=31){
+                        needdata = new ArrayList<Integer>();
+                        data = new ArrayList<Integer>();
+                        need = false;
+                    }
+                }} catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     // Create a BroadcastReceiver for ACTION_FOUND.
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -303,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
                 mmSocket.connect();
                 tmpOut  = mmSocket.getOutputStream();
                 tmpIn = mmSocket.getInputStream();
+                bluetoothAdapter.cancelDiscovery();
             //目前下列註解不使用
 //                while(t!=1024) {
 //                    t++;
